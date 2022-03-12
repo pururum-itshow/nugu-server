@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name="humidity_tb")
 public class Humidity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
