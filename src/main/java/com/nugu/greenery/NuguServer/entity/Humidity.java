@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 
 //entity
@@ -15,13 +16,13 @@ import java.sql.Timestamp;
 public class Humidity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NonNull
-    private long id;
-
-    @NonNull
-    @Column(name = "datetime_value", nullable = false)
-    private Timestamp datetime;
+    @Column(name = "humidity_id", nullable = false)
+    private Long id;
 
     @Column(name = "humidity_value", nullable = false)
-    private String humidity;
+    @NonNull
+    private int value;
+    @NonNull
+    @Column(name = "humitidy_date", nullable = false)
+    private LocalDateTime datetime;
 }
