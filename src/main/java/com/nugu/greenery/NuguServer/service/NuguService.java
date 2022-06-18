@@ -2,6 +2,7 @@ package com.nugu.greenery.NuguServer.service;
 
 import com.nugu.greenery.NuguServer.dto.response.NuguResponse;
 import com.nugu.greenery.NuguServer.dto.response.WeatherResponseDto;
+import com.nugu.greenery.NuguServer.entity.Humidity;
 import com.nugu.greenery.NuguServer.entity.repository.HumidityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URLEncoder;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -30,8 +32,37 @@ public class NuguService {
     private String apiKey;
 
     @Transactional
-    public void requestHumidity() {
+    public NuguResponse requestHumidity() {
+        Map<String, Object> output = new HashMap<>();
 
+        Humidity humidity = humidityRepository.findLastestHumidity();
+        int value = humidity.getValue();
+
+        //상태 계산
+        String status;
+        if (value < 20) {
+            status = "매우 마름";
+        } else if (value < 40) {
+            status = "마름";
+        } else if(value<70){
+            status = "";
+        }else if (value < 80) {
+            status = "촉촉함";
+        } else {
+            status = "축축함";
+        }
+
+        LocalDate now = LocalDate.now();
+        output.put("month", Integer.toString(now.getMonthValue()));   //달
+        output.put("day", Integer.toString(now.getDayOfMonth()));     //일
+        output.put("humidity", Integer.toString(value));      //습도
+        output.put("status", status);       //상태
+
+        return NuguResponse.builder()
+                .version("2.0")
+                .resultCode("OK")
+                .output(output)
+                .build();
     }
 
     public NuguResponse requestWeather() {
@@ -73,33 +104,42 @@ public class NuguService {
         for (WeatherResponseDto.Item item : items) {
             //강수형태
             if (item.getCategory().equals("PTY")) {
-                switch(Integer.parseInt(item.getObsrValue())){
-                    case 1: case 5: case 6: status = "rain"; break;
-                    case 2: case 3: case 4: case 7: status = "snow"; break;
+                switch (Integer.parseInt(item.getObsrValue())) {
+                    case 1:
+                    case 5:
+                    case 6:
+                        status = "rain";
+                        break;
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 7:
+                        status = "snow";
+                        break;
                 }
             }
 
             // 풍속
             else if (item.getCategory().equals("WSD")) {
                 double windSpeed = Double.parseDouble(item.getObsrValue());
-                if(windSpeed>14){
-                    status="wind";
+                if (windSpeed > 14) {
+                    status = "wind";
                 }
             }
             //습도
             else if (item.getCategory().equals("REH")) {
                 int REH = Integer.parseInt(item.getObsrValue());
-                if(REH<=40){
-                    status="dry";
+                if (REH <= 40) {
+                    status = "dry";
                 }
             }
             //기온
             else if (item.getCategory().equals("T1H")) {
                 double tempature = Double.parseDouble(item.getObsrValue());
-                if(tempature>=33){
-                    status="hot";
-                }else if(tempature<=0){
-                    status="cold";
+                if (tempature >= 33) {
+                    status = "hot";
+                } else if (tempature <= 0) {
+                    status = "cold";
                 }
                 output.put("tempature", item.getObsrValue());
             }

@@ -3,15 +3,12 @@ package com.nugu.greenery.NuguServer.entity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-
-//entity
 @Entity
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name="humidity_tb")
 public class Humidity {
     @Id
